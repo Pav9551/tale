@@ -17,6 +17,11 @@ WPARAM wParam, LPARAM lParam);
 void EnableOpenGL (HWND hWnd, HDC *hDC, HGLRC *hRC);
 void DisableOpenGL (HWND hWnd, HDC hDC, HGLRC hRC);
 
+GLfloat heartX = 0.0f; // Начальное положение сердечка по горизонтали
+GLfloat heartY = 0.0f; // Начальное положение сердечка по вертикали
+GLfloat heartSpeed = 0.05f; // Скорость движения
+
+
 POINTFLOAT *mas = NULL;
 int cnt;
 float scaleY;
@@ -75,6 +80,25 @@ void Add(float x, float y)
 		mas[i-1] = mas[i];
 	mas[cnt - 1].x = x;
 	mas[cnt - 1].y = y;
+}
+
+void drawHeart() {
+	glColor3f(1.0f, 0.0f, 0.0f); // Красный цвет
+	glPushMatrix();
+	
+	glRotatef(135, 0, 0,-1);
+	glScalef(0.5, 0.5, 1);
+    glBegin(GL_TRIANGLES); // Начало рисования треугольников
+    	
+        glVertex3f(-0.5f, 0.0f, 0.0f);  // Левая вершина
+        glVertex3f(0.0f, 0.5f, 0.0f);   // Верхняя вершина
+        glVertex3f(0.5f, 0.0f, 0.0f);   // Правая вершина
+
+        glVertex3f(0.0f, 0.0f, 0.0f);   // Нижняя левая вершина
+        glVertex3f(0.5f, 0.0f, 0.0f);   // Нижняя правая вершина
+        glVertex3f(0.0f, -0.5f, 0.0f);  // Нижняя вершина
+    glEnd(); // Конец рисования треугольников
+    glPopMatrix();
 }
 /**************************
  * WinMain
@@ -157,6 +181,10 @@ int WINAPI WinMain (HINSTANCE hInstance,
 			glColor3f(0,1,1);
 			Show();
 			
+			glTranslatef(heartX, heartY, 0.0f);
+			drawHeart();
+			
+			
             SwapBuffers (hDC);
             Sleep (1);
         }
@@ -192,6 +220,9 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message,
     	if ((int)wParam > 0) scaleY *=1.5;// scaleY = scaleY * 1.5
     		else scaleY *= 0.7;
     	if (scaleY < 0.02) scaleY = 0.02;
+    	
+    	//heartY += heartSpeed;
+
     	return 0;
 
     case WM_DESTROY:
@@ -202,6 +233,18 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message,
         {
         case VK_ESCAPE:
             PostQuitMessage(0);
+            return 0;
+        case 'w': case 'W': case VK_UP:
+            heartY += heartSpeed;
+            return 0;
+        case 's': case 'S': case VK_DOWN:
+            heartY -= heartSpeed;
+            return 0;
+        case 'd': case 'D':
+            heartX += heartSpeed;
+            return 0;
+        case 'a': case 'A':
+            heartX -= heartSpeed;
             return 0;
         }
         return 0;
